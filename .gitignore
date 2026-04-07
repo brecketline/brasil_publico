@@ -1,0 +1,16 @@
+# Dados brutos
+data/raw/
+
+
+.venv/
+
+
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+.DS_Store
+
+*.CSV
+*.csv
+data/raw/
