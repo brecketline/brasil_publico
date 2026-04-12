@@ -1,0 +1,32 @@
+# ─── Dados brutos (não redistribuíveis / muito grandes) ──────
+data/raw/ibge/*.txt
+data/raw/ibge/*.xls
+data/raw/ibge/*.zip
+data/raw/mte/
+data/raw/inss/
+data/raw/ipeadata/
+data/raw/ocde/
+
+# ─── Dados processados grandes ───────────────────────────────
+data/processed/pnadc_2023_anual.csv
+
+# ─── Artefatos de conversão jupytext ─────────────────────────
+notebooks/**/*.py
+
+# ─── Jupyter ─────────────────────────────────────────────────
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# ─── macOS ───────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+
+# ─── Python ──────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.egg-info/
+
+# ─── Script de sanitização (uso local) ───────────────────────
+sanitizar_caminhos.py
