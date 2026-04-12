@@ -76,5 +76,7 @@ escala-6x1/
 ├── scripts/               # Automação de download
 ├── DECISIONS.md           # Metodologia detalhada
 └── README.md
-
+```
 Este projeto faz parte do Brasil Público, um repositório de análises de dados sobre notícias veiculadas no Brasil.
+
+
