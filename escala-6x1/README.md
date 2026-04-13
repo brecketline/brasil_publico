@@ -1,12 +1,12 @@
 # Brasil Público — Escala 6x1
 
-Você provavelmente já viu a manchete: se a jornada de trabalho cair de 44 horas para 40 horas por semana, o Brasil perderia **R$ 77 bilhões**. É um número grande, que soa definitivo. Mas de onde ele vem, exatamente?
+Você provavelmente viu a manchete: se a jornada de trabalho cair de 44 para 40 horas semanais, o Brasil perde R$ 77 bilhões. É um número expressivo que faz o fim da escala 6x1 soar como uma tragédia. Mas de onde esse valor vem?
 
-Essa pergunta é o ponto de partida deste projeto.
+Essa pergunta é o ponto de partida dessa segunda análise.
 
-A CNI (Confederação Nacional da Indústria) publicou em Abril de 2026 uma projeção apontando queda de **0,7% no PIB** com a redução da jornada. A estimativa é séria e merece atenção. O problema é que ela chegou sem metodologia publicada — sem explicar quais suposições foram feitas para chegar ali. E suposições, nesse tipo de cálculo, mudam tudo.
+A CNI (Confederação Nacional da Indústria) publicou em Abril de 2026 uma projeção apontando queda de **0,7% no PIB** com a redução da jornada. A estimativa é séria e merece atenção. O problema é que ela foi difundida sem explicar quais suposições foram feitas para chegar nesses números. E suposições, nesse tipo de cálculo, mudam tudo.
 
-Este modelo, construído com dados públicos do IBGE, busca entender como esse impacto é calculado e o que acontece com o resultado quando variamos as premissas. O impacto não é um número fixo: é um intervalo que depende de hipóteses que raramente aparecem na manchete.
+Este modelo usa dados do IBGE para mostrar como o cálculo foi feito e como o resultado muda conforme os critérios utilizados. Esse impacto não é um número exato: ele varia conforme condições que raramente são explicadas nas manchetes.
 
 ## O que este projeto faz
 
@@ -77,6 +77,8 @@ escala-6x1/
 ├── DECISIONS.md           # Metodologia detalhada
 └── README.md
 ```
+
+
 Este projeto faz parte do Brasil Público, um repositório de análises de dados sobre notícias veiculadas no Brasil.
 
 
