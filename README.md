@@ -27,7 +27,7 @@ Para garantir a integridade das análises e evitar o viés de confirmação, sig
 
 ## Análises Disponíveis
 
-- **[01 - EAD vs Presencial (CNN 2015)](./analise_cnn_ead_2015):** Uma investigação sobre os números do ensino à distância veiculada em 2015.
+- **[01 - EAD vs Presencial (CNN 2015)](./analise_cnn_ead_2025):** Uma investigação sobre os números do ensino à distância veiculada em 2025.
 
 ---
 
