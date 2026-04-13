@@ -27,7 +27,8 @@ Para garantir a integridade das análises e evitar o viés de confirmação, sig
 
 ## Análises Disponíveis
 
-- **[01 - EAD vs Presencial (CNN 2015)](./analise_cnn_ead_2025):** Uma investigação sobre os números do ensino à distância veiculada em 2025.
+- **[01 - EAD vs Presencial (CNN 2025)](./analise_cnn_ead):** Uma investigação sobre os números do ensino à distância veiculada em 2025.
+- **[02 - Fim da escala 6x1 (CNI 2026)](./escala_6x1):** Usando dados públicos do IBGE, investiguei o impacto real da redução de jornada de 44h para 40h no PIB brasileiro e mostrei que o resultado depende de hipóteses que raramente aparecem na manchete.
 
 ---
 
