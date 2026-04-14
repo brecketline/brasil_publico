@@ -11,8 +11,8 @@ import urllib.request
 import os
 from pathlib import Path
 
-BASE    = next(p for p in [Path().resolve()] + list(Path().resolve().parents)
-               if (p / "DECISIONS.md").exists())
+BASE = next(p for p in [Path().resolve()] + list(Path().resolve().parents)
+            if (p / "DECISIONS.md").exists())
 DIR_RAW = BASE / "data/raw/ibge"
 DIR_RAW.mkdir(parents=True, exist_ok=True)
 
@@ -50,16 +50,19 @@ ARQUIVOS = [
     ),
 ]
 
+
 def baixar(url, destino, tamanho_mb):
     if destino.exists():
         tamanho_atual = destino.stat().st_size / 1024 / 1024
         if tamanho_atual > tamanho_mb * 0.9:
-            print(f"  ✓ Já existe: {destino.name} ({tamanho_atual:.0f} MB)")
+            print(f"  Já existe: {destino.name} ({tamanho_atual:.0f} MB)")
             return
         else:
-            print(f"  ⚠ Arquivo incompleto ({tamanho_atual:.0f} MB), baixando novamente...")
+            print(
+                f"  Arquivo incompleto ({tamanho_atual:.0f} MB), baixando novamente...")
 
-    print(f"  Baixando {destino.name} (~{tamanho_mb} MB)...", end=" ", flush=True)
+    print(f"  Baixando {destino.name} (~{tamanho_mb} MB)...",
+          end=" ", flush=True)
 
     def progresso(count, block_size, total_size):
         if total_size > 0:
@@ -70,9 +73,10 @@ def baixar(url, destino, tamanho_mb):
     try:
         urllib.request.urlretrieve(url, destino, reporthook=progresso)
         tamanho = destino.stat().st_size / 1024 / 1024
-        print(f"\r  ✓ {destino.name} ({tamanho:.0f} MB)")
+        print(f"\r  {destino.name} ({tamanho:.0f} MB)")
     except Exception as e:
-        print(f"\r  ✗ Erro ao baixar {destino.name}: {e}")
+        print(f"\r  Erro ao baixar {destino.name}: {e}")
+
 
 print("Brasil Público — Download de dados brutos")
 print(f"Destino: {DIR_RAW}")

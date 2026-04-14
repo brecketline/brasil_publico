@@ -1,9 +1,9 @@
 # DECISIONS.md
-**Projeto:** Brasil Público — Escala 6x1
-**Última atualização:** 2026-04-10
-**Responsável:** Brasil Público
+**Projeto:** Brasil Público — Escala 6x1  
+**Última atualização:** 2026-04-12  
+**Responsável:** Brasil Público  
 
-Este arquivo documenta decisões metodológicas, fontes utilizadas, hipóteses assumidas e limitações conhecidas.
+Este documento reúne as principais decisões metodológicas do projeto incluindo escolhas de dados, hipóteses adotadas e limitações já identificadas. A ideia é deixar claro não só *o que foi feito*, mas *por que foi feito assim* e onde o modelo ainda pode falhar.
 
 ---
 
@@ -28,265 +28,260 @@ Este arquivo documenta decisões metodológicas, fontes utilizadas, hipóteses a
 
 ## D01 — Dados: PNAD Contínua vs PNAD antiga {#d01}
 
-**Decisão:** usar exclusivamente a PNAD Contínua (2012–presente).
+**Decisão:** trabalhar exclusivamente com a PNAD Contínua (2012–presente).
 
-**Justificativa:** a PNAD anual foi descontinuada em 2015 e possui diferenças de cobertura, periodicidade e definição de variáveis incompatíveis com a PNAD Contínua.
+**Por quê:** a PNAD anual foi encerrada em 2015 e não é diretamente comparável com a versão contínua — há diferenças relevantes de metodologia, cobertura e definição de variáveis.
 
-**Impacto:** limita a série histórica a partir de 2012. Aceitável para o escopo.
+**Consequência:** abrimos mão de séries mais longas, mas ganhamos consistência. Para o objetivo do projeto, isso é mais importante.
 
-**Referência:** IBGE, Nota técnica nov/2015.
+**Referência:** IBGE, nota técnica (nov/2015).
 
 ---
 
 ## D02 — Dados: Trimestre inicial e cobertura temporal {#d02}
 
-**Decisão:** usar os 4 trimestres de 2023 como base principal.
+Optamos por usar os quatro trimestres de 2023 como base principal.
 
-**Arquivos:** PNADC_012023 a PNADC_042023 — total 1.900.989 observações.
+Isso nos dá uma fotografia recente, com boa representatividade e sem distorções de períodos atípicos (como pandemia).
 
-**Layout:** `input_PNADC_trimestral.txt` — IBGE, versão 2022-10-31.
+**Arquivos utilizados:** PNADC_012023 a PNADC_042023  
+**Total:** 1.900.989 observações  
+
+**Layout:** `input_PNADC_trimestral.txt` (IBGE, versão 2022-10-31)
 
 ---
 
 ## D03 — Dados: Variável de horas trabalhadas {#d03}
 
-**Decisão:** usar `VD4031` (horas habituais em todos os trabalhos).
+**Escolha:** usar `VD4031` (horas habituais em todos os trabalhos).
 
-**Justificativa:** variável derivada pelo IBGE que consolida todos os vínculos. Mais representativa da carga total.
+Essa variável já vem consolidada pelo IBGE, somando múltiplos vínculos quando existem. Na prática, é a melhor aproximação da carga total de trabalho de cada pessoa.
 
-**Limitação:** autodeclarada, sujeita a viés de memória.
+**Ponto de atenção:** como é autodeclarada, pode carregar algum erro de memória ou arredondamento.
 
 ---
 
 ## D04 — Dados: Filtragem de ocupados {#d04}
 
-**Decisão:** filtrar apenas `VD4002 == "1"` (ocupados na semana de referência).
+Aqui não tem muito mistério: filtramos apenas quem estava efetivamente ocupado na semana de referência (`VD4002 == "1"`).
 
-**Resultado:** 815.737 observações (42,9% da amostra).
+Depois do filtro, ficamos com:
+
+- **815.737 observações**
+- cerca de **42,9% da amostra original**
 
 ---
 
 ## D05 — Modelo: Identidade PIB = Horas × Produtividade {#d05}
 
-**Identidade:**
-```
+A base do modelo é simples e conhecida:
 PIB_i = N_i × H_i × P_i
-Δ%PIB_i ≈ Δ%H_i + Δ%P_i  (N constante, aproximação 1ª ordem)
-```
+Δ%PIB_i ≈ Δ%H_i + Δ%P_i
 
-**Limitação:** não captura efeitos de demanda, preços, longo prazo ou heterogeneidade intrasetorial.
+
+Assumimos o número de trabalhadores constante no curto prazo, o que permite essa aproximação de primeira ordem.
+
+**Importante:** isso é um modelo *deliberadamente simplificado*. Ele não captura efeitos de demanda, preços ou mudanças estruturais mais profundas.
 
 ---
 
 ## D06 — Modelo: Abandono da âncora CNI {#d06}
 
-**Decisão:** não usar o -0,7% da CNI como insumo. Tratar apenas como referência de comparação.
+**Decisão:** não usar o -0,7% da CNI como input do modelo.
 
-**Justificativa:** o -0,7% da CNI implica elasticidade implícita de ~0,077 com estrutura não documentada. Misturá-lo ao nosso modelo gera inconsistência metodológica.
+A estimativa da CNI até pode ser útil como referência externa, mas não sabemos exatamente como ela foi construída. Incorporar esse número diretamente criaria uma inconsistência metodológica.
+
+Em outras palavras: preferimos errar com transparência do que acertar sem saber por quê.
 
 ---
 
 ## D07 — Modelo: Fontes dos ganhos de produtividade {#d07}
 
-**Cenários de ganho definidos:**
+Os cenários de produtividade foram definidos com base em literatura empírica:
 
-| Cenário | Ganho P/hora | Referência principal |
+| Cenário | Ganho por hora | Interpretação |
 |---|---|---|
-| Base | 0% | — |
-| A | +3% | Estimativa conservadora |
-| B | +6% | Collewet & Sauermann (2017) |
-| C | +9% | Pencavel (2015) — limite superior ⚠️ |
+| Base | 0% | Nenhum ajuste |
+| A | +3% | Conservador |
+| B | +6% | Valor central |
+| C | +9% | Limite otimista |
 
-**Collewet & Sauermann (2017):** Labour Economics, 47, 96–106. Call center holandês, n=332, 6 anos.
+**Referências principais:**
+- Collewet & Sauermann (2017) — call center holandês  
+- Pencavel (2015) — indústria de guerra britânica contexto extremo  
+- Experimentos na Islândia (2015–2019)
 
-**Pencavel (2015):** The Economic Journal, 125(589). Munições britânicas, 1914. ⚠️ Contexto muito diferente.
-
-**Islândia (2015–2019):** setor público, sem queda de produtividade. Fonte: Autonomy/ALDA (2021).
+O cenário C existe mais como limite teórico do que como expectativa realista.
 
 ---
 
 ## D08 — Modelo: Faixa afetada — correção da coluna {#d08}
 
-**Correção (2026-04-10):** versão anterior usava `(VD4031 >= 40) & (VD4031 <= 44)`, incluindo trabalhadores em 40h exatas que não precisam reduzir jornada.
+Uma correção importante foi feita em 2026-04-10.
 
-**Correto:** `(VD4031 > 40) & (VD4031 <= 44)`.
+Antes, estávamos incluindo trabalhadores com exatamente 40h — o que não faz sentido, já que eles não teriam redução.
 
-**Impacto:** redução expressiva nas parcelas afetadas. Exemplo: Adm. pública passou de 65,7% → 5,5%.
+**Antes:**
+VD4031 >= 40 & VD4031 <= 44
+
+**Agora:**
+VD4031 > 40 & VD4031 <= 44
+
+
+O impacto foi grande. Em alguns setores, a parcela afetada caiu drasticamente (ex: administração pública).
 
 ---
 
 ## D09 — Limitações conhecidas do modelo {#d09}
 
-| Limitação | Nível | Direção do viés |
+Nenhuma surpresa aqui — o modelo tem várias limitações, e é melhor deixá-las explícitas:
+
+| Limitação | Gravidade | Tendência |
 |---|---|---|
-| Modelo estático, curto prazo | Alto | Neutro/subestima médio prazo |
-| Sem demanda agregada | Alto | Subestima ganhos |
-| Ganhos de produtividade internacionais | Médio | Incerto |
-| Informalidade (~39% dos ocupados) | Médio | Subestima parcela afetada |
-| Pencavel (2015) = dados de 1914 | Alto | Não generalizável |
+| Curto prazo / estático | Alta | Subestima médio prazo |
+| Sem demanda agregada | Alta | Subestima ganhos |
+| Uso de evidência internacional | Média | Incerto |
+| Informalidade elevada | Média | Subestima impacto |
+| Dados históricos (Pencavel) | Alta | Baixa validade externa |
 
 ---
 
-## D10 — Modelo: Correspondência setorial PNAD × CNT {#d10}
+## D10 — Modelo: Correspondência PNAD × CNT {#d10}
 
-**Problema:** PNAD usa ~11 grupamentos (VD4010); CNT usa ~12 atividades econômicas. Não há mapeamento oficial direto.
+Um dos pontos mais 'chatos' do trabalho foi alinhar PNAD com Contas Nacionais.
 
-**Tabela de correspondência adotada:**
+As classificações simplesmente não batem.
 
-| Setor PNAD | Coluna CNT | Qualidade |
+O que fizemos foi construir uma correspondência prática:
+
+| Setor PNAD | CNT | Observação |
 |---|---|---|
-| Agropecuária | agropecuaria |  Direta |
-| Indústria geral | ind_transformacao | Parcial (~60% do VA industrial) |
-| Construção | construcao | Direta |
-| Comércio e rep. | comercio | Direta |
-| Transp. e armaz. | transporte | Direta |
-| Inf. e serv. prof. | info_comunicacao | Parcial |
-| Adm. públ. e educação | adm_publica_saude_educ | Ampla — agrega saúde e educação públicas |
-| Alojamento e alim. | outros_servicos | Excluída |
-| Saúde | adm_publica_saude_educ | Excluída |
-| Serv. domésticos | outros_servicos | Excluída |
+| Agropecuária | agropecuaria | Direto |
+| Indústria | ind_transformacao | Parcial |
+| Construção | construcao | Direto |
+| Comércio | comercio | Direto |
+| Transporte | transporte | Direto |
+| Informação | info_comunicacao | Parcial |
+| Adm. pública | adm_publica_saude_educ | Amplo |
 
-**Consequência:** magnitude dos setores deve ser interpretada com cautela. Direção do impacto é confiável.
+Alguns setores ficaram de fora.
+
+**Resumo:** os valores absolutos pedem cautela mas a direção dos efeitos é robusta.
 
 ---
 
-## D11 — Modelo: Hipótese forte da faixa 41–44h {#d11}
+## D11 — Modelo: Hipótese da faixa 41–44h {#d11}
 
-**Hipótese:** apenas trabalhadores com 41h < VD4031 ≤ 44h são diretamente afetados.
+Aqui está uma das hipóteses mais fortes do modelo.
 
-**O que essa hipótese ignora:**
-1. Trabalhadores acima de 44h que também reduziriam
-2. Efeito de contágio: empregadores podem uniformizar jornada para todos
-3. Trabalhadores informais nessa faixa sem proteção legal
+Assumimos que apenas trabalhadores entre **41h e 44h** seriam diretamente afetados.
 
-**Redução assumida:** de 42h (média da faixa) para 40h = **-4,76%**.
+Isso ignora três coisas importantes:
+1. Quem trabalha acima de 44h  
+2. Ajustes generalizados das empresas  
+3. Informalidade  
 
-**Direção do viés:** o modelo subestima o impacto total. O resultado de -0,513% é um **limite inferior**.
+A redução média assumida foi:
+
+de 42h para 40h (**-4,76%**)
+
+**Leitura correta:** isso puxa o resultado para baixo. O modelo tende a subestimar o impacto total.
 
 ---
 
 ## D12 — Modelo: Nomenclatura dos cenários {#d12}
 
-**Decisão:** substituir "hipótese nula" por "cenário base".
+Troca simples, mas necessária.
 
-**Justificativa:** "hipótese nula" tem conotação estatística específica. O correto é "cenário base" — produtividade por hora constante após redução de jornada.
-
-**Nomenclatura adotada:**
-
-| Nome | Δ produtividade/hora | Interpretação |
-|---|---|---|
-| Cenário base | 0% | Sem ajuste de eficiência. Impacto máximo esperado. |
-| Cenário A | +3% | Compensação parcial conservadora |
-| Cenário B | +6% | Linha central da literatura |
-| Cenário C | +9% | Limite superior otimista |
+“Hipótese nula” foi substituído por **cenário base** que é um termo mais adequado fora de testes estatísticos formais.
 
 ---
 
-## D13 — Modelo: Cobertura diferencial PNAD × Contas Nacionais {#d13}
+## D13 — Modelo: PNAD vs Contas Nacionais {#d13}
 
-**Problema:** as bases têm coberturas diferentes.
+As bases não medem exatamente a mesma coisa.
 
-| Dimensão | PNAD | CNT |
+| Aspecto | PNAD | CNT |
 |---|---|---|
-| Trabalhadores | Formal + informal (parcial) | Toda a economia (inclui estimativas informais) |
-| Setor informal | Parcialmente captado | Estimado por métodos indiretos |
+| Cobertura | Parcial | Total |
+| Informalidade | Subcaptada | Estimada |
 
-**Consequência:** produtividade por hora é **superestimada** em setores com alta informalidade (Agropecuária, Construção) porque o denominador (horas da PNAD) subestima o total real de horas.
+Isso gera um efeito importante:
 
-**Postura:** usar os dados como estão e documentar a limitação. Sem correções ad hoc.
+produtividade por hora tende a ser **superestimada** em setores informais
+
+Decidimos não corrigir isso artificialmente apenas documentar.
 
 ---
 
-## D14 — Modelo: Setores excluídos e subestimação {#d14}
+## D14 — Modelo: Setores excluídos {#d14}
 
-**Setores excluídos:**
+Alguns setores ficaram de fora por limitações de dados:
 
-| Setor | Motivo | Impacto potencial não capturado |
-|---|---|---|
-| Alojamento e alim. | Coluna CNT muito agregada | ~R$ -13,6 bi |
-| Saúde | VAB não separável da Adm. pública | ~R$ -7,1 bi |
-| Serv. domésticos | VAB formal irrisório | ~R$ -7,5 bi |
+- Alojamento e alimentação  
+- Saúde  
+- Serviços domésticos  
 
-**Total potencialmente subestimado:** ~R$ -28,2 bi
+Estimativa do impacto não capturado: **~R$ -28,2 bi**
 
-**Faixa de incerteza do modelo:**
-- **Resultado reportado (setores incluídos):** -0,513%
-- **Resultado com todos os setores (proxies imperfeitas):** ~-0,77%
-- **Referência CNI:** -0,70%
+Isso leva a uma faixa mais realista:
 
-O resultado de -0,513% é o **limite inferior conservador**. O resultado real provavelmente está entre -0,513% e -0,77%.
+- Resultado mínimo: **-0,513%**
+- Resultado provável: até **~ -0,77%**
 
 ---
 
-## D15 — Modelo: Interpretação da diferença em relação à CNI {#d15}
+## D15 — Modelo: Comparação com a CNI {#d15}
 
-**Formulação incorreta:**
-> "Nosso modelo é menos pessimista que a CNI."
+Evitamos uma leitura simplista do tipo:
 
-**Formulação correta:**
-> "Sob hipóteses mais restritas e transparentes — faixa 41–44h apenas, sem efeitos de segunda ordem — o modelo estima -0,513% no PIB. A CNI estima -0,70% com metodologia não publicada, possivelmente incluindo efeitos de custos trabalhistas e perda de competitividade não capturados aqui."
+> “nosso modelo é melhor” ou “mais otimista”
 
-**Comparação dos modelos:**
+A forma mais honesta de colocar é:
 
-| Elemento | Nosso modelo | CNI |
-|---|---|---|
-| Faixa afetada | 41–44h apenas | Não documentado |
-| Efeitos de segunda ordem | Não incluídos | Possivelmente incluídos |
-| Transparência | Total — código aberto | Não publicada |
-| Resultado (cenário base) | -0,513% | -0,70% |
+> Sob hipóteses mais restritas e explícitas, estimamos -0,513%.  
+> A CNI chega a -0,70% com uma metodologia não divulgada.
 
-**Conclusão:** a diferença de 0,187 pp não indica que um modelo está certo e o outro errado. Indica hipóteses diferentes. A contribuição do projeto é tornar as hipóteses explícitas e auditáveis.
+Ou seja: a diferença vem das hipóteses, não necessariamente da qualidade.
 
 ---
 
-*Próxima atualização: após implementação dos cenários A, B e C (D16).*
+## D16 — Modelo: Adoção da Formulação C {#d16}
+
+**Data:** 2026-04-11  
+
+Aqui foi uma mudança relevante.
+
+Testamos duas formas de calcular a redução de horas:
+
+| Métrica | A | C |
+|---|---|---|
+| ΔH | -4,76% | -5,82% |
+| ΔPIB | -0,513% | -0,627% |
+
+A diferença não é pequena — ~18%.
+
+Como isso ultrapassa o limite definido no próprio projeto, adotamos a **Formulação C como padrão**.
+
+**Intuição:**  
+reduções percentuais não são lineares. A média simples subestima o efeito real.
+
+**Limitação que sobra:**  
+não sabemos a distribuição exata dentro da faixa 41–44h. Se houver concentração em 44h, ainda podemos estar subestimando.
 
 ---
 
-## D16 — Modelo: Adoção da Formulação C como padrão de ΔH {#d16}
+### Conclusão geral
 
-**Data da decisão:** 2026-04-11
+O modelo não pretende ser definitivo.
 
-**Contexto:** o modelo utilizava Formulação A (ΔH = redução da média da faixa 41–44h = -4,76%) como estimativa da intensidade de redução de horas para trabalhadores afetados.
+Ele é, antes de tudo, **explícito**:
+- deixa claro onde simplifica
+- onde pode errar
+- e em que direção tende a errar
 
-**Teste de robustez realizado:** comparação com Formulação C (média ponderada das reduções individuais dentro da faixa 41–44h, assumindo distribuição uniforme) com escopo idêntico.
-
-**Resultado do teste:**
-
-| Métrica | Formulação A | Formulação C |
-|---|---|---|
-| ΔH assumido | -4,7619% | -5,8171% |
-| ΔPIB agregado | -0,5134% | -0,6272% |
-| Viés relativo | 18,14% | — (referência) |
-
-**Critério de decisão (definido a priori no notebook):**
-- Viés < 5%: A adequada
-- Viés 5–15%: viés moderado
-- Viés > 15%: A inadequada, adotar C
-
-**Resultado:** viés de 18,14% → acima do limiar. **Formulação C adotada como padrão.**
-
-**Justificativa matemática:**
-A Formulação A usa a média da faixa (42h) como referência, aplicando ΔH = (40-42)/42 = -4,76% uniformemente. A Formulação C calcula a média ponderada das reduções individuais:
-
-```
-ΔH_C = média[ (40-41)/41, (40-42)/42, (40-43)/43, (40-44)/44 ]
-     = média[ -2,44%, -4,76%, -6,98%, -9,09% ]
-     = -5,82%
-```
-
-A diferença ocorre porque a função ΔH(h) = (40-h)/h é côncava — a média das reduções individuais é maior (em módulo) do que a redução da média. A Formulação A subestima sistematicamente o ΔH médio da faixa.
-
-**Limitação remanescente da Formulação C:**
-A distribuição real dentro da faixa 41–44h provavelmente não é uniforme. Há provável concentração em 44h exatas (por convenção coletiva e contratos padronizados). Se a distribuição for mais concentrada em 44h, a Formulação C subestima o ΔH real; se mais concentrada em 41h, superestima. Sem microdados por hora exata dentro da faixa, não é possível calcular a distribuição real.
-
-**Impacto na faixa de incerteza do modelo:**
-
-| Versão | Cenário base | Limite superior |
-|---|---|---|
-| Com Formulação A | -0,513% | -0,770% |
-| Com Formulação C | -0,627% | ~-0,940% |
-
-**Impacto interpretativo:** com Formulação C, o cenário base (-0,627%) converge para a mesma ordem de grandeza da referência CNI (-0,700%). Isso não implica validação cruzada — as metodologias ainda são distintas — mas reduz a distância entre os modelos e torna as comparações mais cautelosas.
+Isso, no fim, é mais útil do que um número “fechado” sem contexto.
 
 ---
+
+*Próxima atualização: inclusão completa dos cenários A, B e C (D16).*
